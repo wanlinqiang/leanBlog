@@ -21,8 +21,13 @@
     </nav>
     <article>
       <% if(success){ %>
-      <div><% success %></div>
+      <div><%= success %></div>
       <% } %>
       <% if(error){ %>
-      <div><% error %></div>
+      <div><%= error %></div>
+      <% } %>
+      <% if(user){ %>
+      <div>欢迎 <%= user.name %> 的登录！</div>
+      <% }else{ %>
+      <div>您还未登录！</div>
       <% } %>

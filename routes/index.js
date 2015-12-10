@@ -20,7 +20,6 @@ module.exports = function(app){
       success: req.flash('success').toString(),
       error: req.flash('error').toString()
     })
-    console.log(req.session.user)
   })
 
   app.post('/reg', function(req, res){
@@ -42,16 +41,22 @@ module.exports = function(app){
     })
     //检查用户名是否已经存在
     User.get(newUser.name, function(err, user){
+      console.log('检查用户名是否已经存在')
       if(err){
         req.flash('error', err)
         return res.redirect('/')
       }
+      console.log(newUser)
+      console.log(user)
       if(user){
         req.flash('error', '用户已存在')
+        console.log('用户已存在')
         return res.redirect('/reg')  //返回注册页
       }
       //如果不存在则新增用户
       newUser.save(function(err, user){
+        console.log('进入注册主题')
+        console.log(err)
         if(err){
           req.flash('error', err)
           return res.redirect('/reg')  //注册失败返回注册页
@@ -91,9 +96,10 @@ module.exports = function(app){
         req.flash('error', '密码错误！')
         return res.redirect('/login')   //密码错误则跳转到登录页
       }
-      console.log(user)
+      console.log(user.name)
       //用户名密码都匹配后，将用户信息存入 session
       req.session.user = user
+      console.log(req.session.user.name)
       req.flash('success', '登录成功！')
       res.redirect('/')   //登录成功后跳转主页
     })
@@ -105,7 +111,7 @@ module.exports = function(app){
   })
   app.post('/post', function(req, res){})
   //登出
-  app.get('logout', function(req, res){
+  app.get('/logout', function(req, res){
     req.session.user = null
     req.flash('success', '登出成功！')
     res.redirect('/')   //登出成功后跳转到主页
