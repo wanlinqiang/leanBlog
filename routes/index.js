@@ -201,6 +201,22 @@ module.exports = function(app){
     })
   })
 
+  app.get('/tags/:tag', function(req, res){
+    Post.getTag(req.params.tag, function(err, posts){
+      if(err){
+        req.flash('error', err)
+        return res.redirect('/')
+      }
+      res.render('tag', {
+        title: 'TAG:' + req.params.tag,
+        posts: posts,
+        user: req.session.user,
+        success: req.flash('success').toString(),
+        error: req.flash('error').toString()
+      })
+    })
+  })
+
   app.get('/u/:name', function(req, res){
     //检查用户是否存在
     User.get(req.params.name, function(err, user){
@@ -282,7 +298,7 @@ module.exports = function(app){
   app.post('/edit/:name/:day/:title', checkLogin)
   app.post('/edit/:name/:day/:title', function(req, res){
     var currentUser = req.session.user
-    Post.update(currentUser.name, req.params.day, req.params.title, req.body.post, function(err){
+    Post.update(currentUser.name, req.params.day, req.params.title, [req.body.tag1, req.body.tag2, req.body.tag3], req.body.post, function(err){
       var url = encodeURI('/u/' + req.params.name + '/' + req.params.day + '/' + req.params.title )
       if(err){
         req.flash('error', err)

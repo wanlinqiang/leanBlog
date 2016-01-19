@@ -83,6 +83,7 @@ Post.getAll = function(name, callback){
           doc.post = markdown.toHTML(doc.post)
         })
         callback(null, docs)   //成功！以数组形式返回查询的结果
+        console.log(docs)
       })
     })
   })
@@ -156,7 +157,7 @@ Post.edit = function(name, day, title, callback){
 }
 
 //更新一篇文章及其相关信息
-Post.update = function(name, day, title, post, callback){
+Post.update = function(name, day, title, tags, post, callback){
   //打开数据库
   mongodb.open(function(err, db){
     if(err){
@@ -174,7 +175,10 @@ Post.update = function(name, day, title, post, callback){
         "time.day": day,
         "title": title
       }, {
-        $set: {post: post}
+        $set: {
+          post: post,
+          tags: tags
+        }
       }, function(err){
         mongodb.close()
         if(err){
@@ -261,6 +265,38 @@ Post.getTags = function(callback){
       }
       //distinct 用来找出给定键的所有不同值
       collection.distinct('tags', function(err, docs){
+        mongodb.close()
+        if(err){
+          return callback(err)
+        }
+        callback(null, docs)
+      })
+    })
+  })
+}
+
+//返回所有特定标签的所有文章
+Post.getTag = function(tag, callback){
+  mongodb.open(function(err, db){
+    if(err){
+      return callback(err)
+    }
+    db.collection('posts', function(err, collection){
+      if(err){
+        mongodb.close()
+        return callback(err)
+      }
+      //查询所有 tags 数组内包含 tag 的文档
+      //并返回只含有 name 、time 、title 组成的数组
+      collection.find({
+        'tags': tag
+      }, {
+        "name": 1,
+        "time": 1,
+        "title": 1
+      }).sort({
+        time: -1
+      }).toArray(function(err, docs){
         mongodb.close()
         if(err){
           return callback(err)
